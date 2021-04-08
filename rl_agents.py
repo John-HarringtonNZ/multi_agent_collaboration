@@ -12,7 +12,7 @@ class RLAgent(Agent):
         self.numTraining = int(numTraining)
 
     def getQValue(self, state, action):
-
+        return
         
 
     def action(self, state):
