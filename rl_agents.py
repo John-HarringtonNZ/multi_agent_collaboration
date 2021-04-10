@@ -2,6 +2,17 @@ from overcooked_ai_py.agents.agent import Agent, AgentPair, AgentFromPolicy
 from overcooked_ai_py.agents.agent import RandomAgent, GreedyHumanModel
 
 
+class CentralizedAgent(Agent):
+
+    def __init__(self, agent0, agent1):
+        self.reset()
+        self.agentpair = AgentPair(agent0, agent1)
+
+    def action(self, state):
+        ja = self.agentpair.joint_action(state)
+        return ja, {}
+
+
 class RLAgent(Agent):
 
     def __init__(self, alpha=1.0, epsilon=0.05, numTraining=1000):
