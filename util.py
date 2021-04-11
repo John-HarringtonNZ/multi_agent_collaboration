@@ -1,4 +1,4 @@
-
+import random
 
 class Counter(dict):
     """
@@ -226,3 +226,9 @@ def raiseNotDefined():
     print("*** Method not implemented: %s at line %s of %s" %
           (method, line, fileName))
     sys.exit(1)
+
+
+def flipCoin(p):
+    r = random.random()
+    return r < p
+
