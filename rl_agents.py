@@ -1,6 +1,7 @@
 from overcooked_ai_py.agents.agent import Agent, AgentPair, AgentFromPolicy
 from overcooked_ai_py.agents.agent import RandomAgent, GreedyHumanModel
 from overcooked_ai_py.mdp.actions import Action
+from overcooked_ai_py.mdp.overcooked_mdp import ReducedOvercookedState
 import util
 import random
 
@@ -17,12 +18,12 @@ class RLAgentPair(AgentPair):
 class DecentralizedAgent(RLAgentPair):
 
     def observeTransition(self, state, action, nextState, reward):
-        self.a0.update(state, action, nextState, reward)
-        self.a1.update(state, action, nextState, reward)
+        self.a0.update(self.a0.process_state(state), action, self.a0.process_state(nextState), reward)
+        self.a1.update(self.a1.process_state(state), action, self.a0.process_state(nextState), reward)
 
     def joint_action(self, state):
-        act0 = self.a0.action(state)
-        act1 = self.a1.action(state)
+        act0 = self.a0.action(self.a0.process_state(state))
+        act1 = self.a1.action(self.a1.process_state(state))
         return (act0, act1)
 
 #RLAgentPair that acts as single agent, each joint action is really one. 
@@ -74,7 +75,7 @@ class RLAgent(Agent):
 
     #str or features.
     def process_state(self, state):
-        return str(state)
+        return ReducedOvercookedState(state)
 
     def computeValueFromQValues(self, state):
         """
