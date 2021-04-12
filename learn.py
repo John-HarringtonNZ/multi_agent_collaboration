@@ -4,7 +4,6 @@ from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
 import time
 from overcooked_ai_py.planning.planners import MediumLevelActionManager, NO_COUNTERS_PARAMS
 from overcooked_ai_py.agents.agent import RandomAgent, GreedyHumanModel, AgentPair
-from rl_agents import RLAgent, CentralizedAgent
 
 def run_game(agent_pair, env, num_steps, render=False, visualize=False):
 
@@ -13,17 +12,15 @@ def run_game(agent_pair, env, num_steps, render=False, visualize=False):
     for t in range(num_steps):
         if render:  
             env.render()
-            time.sleep(1)
+            time.sleep(0.1)
         
         state = env.base_env.state
 
-        #print(agent_pair.a0.q_values.items())
-
-        act1, act2 = agent_pair.joint_action(str(state))
+        act1, act2 = agent_pair.joint_action(state)
         obs, reward, done, env_info = env.step((act1, act2))
         nextState = env.base_env.state
 
-        agent_pair.observeTransition(str(state), (act1, act2), str(nextState), reward)
+        agent_pair.observeTransition(state, (act1, act2), nextState, reward)
         total_game_reward += reward
         if reward > 0:
             print(f'Got {reward} reward!')
@@ -50,6 +47,3 @@ def run_episodes(agent_pair, env, num_episodes, num_steps, render=False):
     ave_reward = total_episodes_reward / num_episodes
     print(f"Average reward: {ave_reward}")
     return agent_pair, ave_reward
-
-#pair, reward = run_game(central_agent, env, 1000, True)
-#pair, reward = run_episodes(central_agent, env, 1000, 5000, False)

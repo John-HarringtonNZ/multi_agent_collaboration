@@ -4,8 +4,17 @@ from overcooked_ai_py.mdp.actions import Action
 import util
 import random
 
+#Base class for AgentPair with RL functionality (observations, and custom joint actions)
+class RLAgentPair(AgentPair):
 
-class CentralizedAgent(AgentPair):
+    def observeTransition(self, state, action, nextState, reward):
+        return raiseNotDefined()
+
+    #def joint_action(self, state):
+    #    return raiseNotDefined()
+    
+#RLAgentPair with 2 independent agents 
+class DecentralizedAgent(RLAgentPair):
 
     def observeTransition(self, state, action, nextState, reward):
         self.a0.update(state, action, nextState, reward)
@@ -16,18 +25,65 @@ class CentralizedAgent(AgentPair):
         act1 = self.a1.action(state)
         return (act0, act1)
 
-#RL Agent represents potential RL movement between 
+#RLAgentPair that acts as single agent, each joint action is really one. 
+#self.a1 is dummy agent
+#TODO: Complete
+class CentralizedAgent(RLAgentPair):
+    #self.a0 is actual agent
+    #self.a1 is dummy?
+
+#RLAgentPair that allows communication between CommunicateAgents
+#TODO:Clean up and complete
+class BasicCommunicationPair(RLAgentPair):
+    #who talks to who
+
+    #self.agents = {ind:agent}
+
+    def observeTransition(self, state, action, nextState, reward):
+        #self.a0.update(state, action, nextState, reward)
+        #self.a1.update(state, action, nextState, reward)
+
+    def joint_action(self, state):
+        #act0 = self.a0.action(state)
+        #act1 = self.a1.action(state)
+        #return (act0, act1)
+        return raiseNotDefined()
+
+    def request_communication(self, agent_index):
+        return self.agents[agent_index].communicate()
+
+#RLAgent that can request information as well as provide information
+class CommunicateAgent(RLAgent):
+    
+    #what i say
+    def communicate():
+        return raiseNotDefined()
+
+    #request from given agent
+    def request_info(self, agent_index):
+        return raiseNotDefined()
+
+
+
+#Agent with RL functionality, processes state for Agent use.
+#TODO: Update with potential feature usage
 class RLAgent(Agent):
 
     def __init__(self, alpha=1.0, epsilon=0.05, gamma=0.9):
         self.alpha = float(alpha)
         self.epsilon = float(epsilon)
         self.discount = float(gamma)
+        self.pair = parentpair
+        self.index
 
         self.q_values = util.Counter()
 
     def getQValue(self, state, action):
         return self.q_values[(state, action)]
+
+    #str or features.
+    def process_state(self, state):
+        return str(state)
 
     def computeValueFromQValues(self, state):
         """
@@ -74,6 +130,7 @@ class RLAgent(Agent):
         return random.choice(best_actions)     
 
     def getLegalActions(self, state):
+        #TODO: Limit actions to reasonable/doable
         return Action.ALL_ACTIONS
 
     def action(self, state):
@@ -102,9 +159,7 @@ class RLAgent(Agent):
         """
         "*** YOUR CODE HERE ***"
         cur_q_val = self.getQValue(state, action)
-        # print("Q state:")
-        # print((state, action))
-        # print('--')
+
         self.q_values[(state, action)] = cur_q_val + self.alpha * (reward + self.discount*self.getValue(nextState) - cur_q_val)
 
     def getValue(self, state):

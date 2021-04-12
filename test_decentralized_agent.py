@@ -5,7 +5,7 @@ from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
 from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
 from overcooked_ai_py.planning.planners import MediumLevelActionManager, NO_COUNTERS_PARAMS
 from overcooked_ai_py.agents.agent import RandomAgent, AgentPair
-from rl_agents import CentralizedAgent, RLAgent
+from rl_agents import DecentralizedAgent, RLAgent
 
 mdp = OvercookedGridworld.from_layout_name("cramped_room")
 #Other potentially interesting layouts: forced_coordination
@@ -18,7 +18,7 @@ mlam = MediumLevelActionManager.from_pickle_or_compute(mdp, NO_COUNTERS_PARAMS, 
 agent_rand = RandomAgent(all_actions=True)
 rl_agent_1 = RLAgent()
 rl_agent_2 = RLAgent()
-central_agent = CentralizedAgent(rl_agent_1, rl_agent_2)
+central_agent = DecentralizedAgent(rl_agent_1, rl_agent_2)
 
 pair, reward = learn.run_episodes(central_agent, env, 1000, 1000, False)
 
