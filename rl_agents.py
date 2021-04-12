@@ -57,7 +57,6 @@ class RLAgent(Agent):
         """
         "*** YOUR CODE HERE ***"
         actions = self.getLegalActions(state)
-
         if not actions:
           return None
 
@@ -88,8 +87,8 @@ class RLAgent(Agent):
         """
         legalActions = self.getLegalActions(state)
 
-        #if util.flipCoin(self.epsilon):
-        #    return random.choice(legalActions)
+        if util.flipCoin(self.epsilon):
+            return random.choice(legalActions)
 
         best_action = self.computeActionFromQValues(state)
         
@@ -103,7 +102,9 @@ class RLAgent(Agent):
         """
         "*** YOUR CODE HERE ***"
         cur_q_val = self.getQValue(state, action)
-
+        # print("Q state:")
+        # print((state, action))
+        # print('--')
         self.q_values[(state, action)] = cur_q_val + self.alpha * (reward + self.discount*self.getValue(nextState) - cur_q_val)
 
     def getValue(self, state):
