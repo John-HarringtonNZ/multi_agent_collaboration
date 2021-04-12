@@ -29,6 +29,9 @@ class DecentralizedAgent(RLAgentPair):
 #self.a1 is dummy agent
 #TODO: Complete
 class CentralizedAgent(RLAgentPair):
+
+    def stub():
+        print('abc')
     #self.a0 is actual agent
     #self.a1 is dummy?
 
@@ -40,6 +43,7 @@ class BasicCommunicationPair(RLAgentPair):
     #self.agents = {ind:agent}
 
     def observeTransition(self, state, action, nextState, reward):
+        print('stub')
         #self.a0.update(state, action, nextState, reward)
         #self.a1.update(state, action, nextState, reward)
 
@@ -52,18 +56,6 @@ class BasicCommunicationPair(RLAgentPair):
     def request_communication(self, agent_index):
         return self.agents[agent_index].communicate()
 
-#RLAgent that can request information as well as provide information
-class CommunicateAgent(RLAgent):
-    
-    #what i say
-    def communicate():
-        return raiseNotDefined()
-
-    #request from given agent
-    def request_info(self, agent_index):
-        return raiseNotDefined()
-
-
 
 #Agent with RL functionality, processes state for Agent use.
 #TODO: Update with potential feature usage
@@ -73,9 +65,8 @@ class RLAgent(Agent):
         self.alpha = float(alpha)
         self.epsilon = float(epsilon)
         self.discount = float(gamma)
-        self.pair = parentpair
-        self.index
-
+        #self.pair = parentpair
+        #self.index
         self.q_values = util.Counter()
 
     def getQValue(self, state, action):
@@ -178,3 +169,14 @@ class RLAgent(Agent):
             [(action, action_info), (action, action_info), ...]: the actions and action infos for each state-agent_index pair
         """
         return NotImplementedError()
+
+
+#RLAgent that can request information as well as provide information
+class CommunicateAgent(RLAgent):
+    #what i say
+    def communicate():
+        return raiseNotDefined()
+
+    #request from given agent
+    def request_info(self, agent_index):
+        return raiseNotDefined()
