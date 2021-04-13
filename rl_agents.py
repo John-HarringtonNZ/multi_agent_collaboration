@@ -65,7 +65,7 @@ class BasicCommunicationPair(RLAgentPair):
 #TODO: Update with potential feature usage
 class RLAgent(Agent):
 
-    def __init__(self, alpha=1.0, epsilon=0.05, gamma=0.9):
+    def __init__(self, alpha=0.05, epsilon=0.05, gamma=0.9):
         self.alpha = float(alpha)
         self.epsilon = float(epsilon)
         self.discount = float(gamma)
@@ -112,7 +112,7 @@ class RLAgent(Agent):
           return None
 
         best_actions = []
-        best_q_value = -9999
+        best_q_value = -math.inf
 
         for a in actions:
             action_value = self.getQValue(state, a)
@@ -213,9 +213,13 @@ class ApproximateQAgent(RLAgent):
           where * is the dotProduct operator
         """
         features, _ = self.mmdp.custom_featurize_state(state, self.mmlam)#self.featExtractor.getFeatures(state, action)
+        print(features)
         keys = features.keys()
         qval = 0
         for key in keys:
+            print('feature')
+            print(key)
+            print(features[key])
             qval += (self.weights[key] * features[key])
         return qval
 
@@ -224,19 +228,10 @@ class ApproximateQAgent(RLAgent):
         """
            Should update your weights based on transition
         """
-        actions = self.getLegalActions(nextState)
-        highestQ = -math.inf
-        if not actions:
-            highestQ = 0.0
-        for act in actions:
-            curQ = self.getQValue(nextState, act)
-            if curQ > highestQ:
-                highestQ = curQ
-        difference = reward + (self.discount * highestQ) - self.getQValue(state, action)
+        cur_weights = self.getWeights()
+
         features, _ = self.mmdp.custom_featurize_state(state, self.mmlam)#self.featExtractor.getFeatures(state, action)
-        keys = features.keys()
-        for key in keys:
-            self.weights[key] = self.weights[key] + (self.alpha * difference * features[key])
-            print(self.weights[key])
+        difference = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state, action)
 
-
+        for feat, val in features.items():
+            self.getWeights()[feat] = cur_weights[feat] + (self.alpha * difference * val)

@@ -24,6 +24,6 @@ q_agent_1 = ApproximateQAgent(mdp, mlam)
 q_agent_2 = ApproximateQAgent(mdp, mlam)
 central_agent = DecentralizedAgent(q_agent_1, q_agent_2)
 
-pair, reward = learn.run_episodes(central_agent, env, 6, 1000, False)
+pair, reward = learn.run_episodes(central_agent, env, 1000, 1000, False)
 
 pair, reward = learn.run_episodes(pair, env, 10, 500, True)
