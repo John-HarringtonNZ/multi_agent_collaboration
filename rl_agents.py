@@ -18,11 +18,8 @@ class RLAgentPair(AgentPair):
 class DecentralizedAgent(RLAgentPair):
 
     def observeTransition(self, state, action, nextState, reward):
-#        self.a0.update(self.a0.process_state(state), action, self.a0.process_state(nextState), reward)
-#        self.a1.update(self.a1.process_state(state), action, self.a0.process_state(nextState), reward)
-        self.a0.update(state, action, nextState, reward)
-        self.a1.update(state, action, nextState, reward)
-
+        self.a0.update(self.a0.process_state(state), action, self.a0.process_state(nextState), reward)
+        self.a1.update(self.a1.process_state(state), action, self.a0.process_state(nextState), reward)
 
     def joint_action(self, state):
         act0 = self.a0.action(self.a0.process_state(state))
