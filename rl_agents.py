@@ -2,7 +2,7 @@ from overcooked_ai_py.agents.agent import Agent, AgentPair, AgentFromPolicy
 from overcooked_ai_py.agents.agent import RandomAgent, GreedyHumanModel
 from overcooked_ai_py.mdp.actions import Action
 from overcooked_ai_py.mdp.overcooked_mdp import ReducedOvercookedState
-import util
+import util, math
 import random
 
 #Base class for AgentPair with RL functionality (observations, and custom joint actions)
@@ -18,8 +18,11 @@ class RLAgentPair(AgentPair):
 class DecentralizedAgent(RLAgentPair):
 
     def observeTransition(self, state, action, nextState, reward):
-        self.a0.update(self.a0.process_state(state), action, self.a0.process_state(nextState), reward)
-        self.a1.update(self.a1.process_state(state), action, self.a0.process_state(nextState), reward)
+#        self.a0.update(self.a0.process_state(state), action, self.a0.process_state(nextState), reward)
+#        self.a1.update(self.a1.process_state(state), action, self.a0.process_state(nextState), reward)
+        self.a0.update(state, action, nextState, reward)
+        self.a1.update(state, action, nextState, reward)
+
 
     def joint_action(self, state):
         act0 = self.a0.action(self.a0.process_state(state))
@@ -181,3 +184,59 @@ class CommunicateAgent(RLAgent):
     #request from given agent
     def request_info(self, agent_index):
         return raiseNotDefined()
+
+
+class ApproximateQAgent(RLAgent):
+    """
+       ApproximateQLearningAgent, similar to PA3
+
+       You should only have to overwrite getQValue
+       and update.  All other QLearningAgent functions
+       should work as is.
+    """
+    def __init__(self, mdp, mlam, **args):
+        super().__init__(**args)
+        self.weights = util.Counter()
+        self.mmlam = mlam
+        self.mmdp = mdp
+
+    def getWeights(self):
+        return self.weights
+
+    def process_state(self, state):
+        return state
+
+    #TODO: problem is this must be real state not process_state
+    def getQValue(self, state, action):
+        """
+          Should return Q(state,action) = w * featureVector
+          where * is the dotProduct operator
+        """
+        features, _ = self.mmdp.custom_featurize_state(state, self.mmlam)#self.featExtractor.getFeatures(state, action)
+        keys = features.keys()
+        qval = 0
+        for key in keys:
+            qval += (self.weights[key] * features[key])
+        return qval
+
+    #TODO: problem is this must be real states not process_state bc pass to getQValue
+    def update(self, state, action, nextState, reward):
+        """
+           Should update your weights based on transition
+        """
+        actions = self.getLegalActions(nextState)
+        highestQ = -math.inf
+        if not actions:
+            highestQ = 0.0
+        for act in actions:
+            curQ = self.getQValue(nextState, act)
+            if curQ > highestQ:
+                highestQ = curQ
+        difference = reward + (self.discount * highestQ) - self.getQValue(state, action)
+        features, _ = self.mmdp.custom_featurize_state(state, self.mmlam)#self.featExtractor.getFeatures(state, action)
+        keys = features.keys()
+        for key in keys:
+            self.weights[key] = self.weights[key] + (self.alpha * difference * features[key])
+            print(self.weights[key])
+
+

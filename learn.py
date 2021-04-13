@@ -20,6 +20,8 @@ def run_game(agent_pair, env, num_steps, render=False, visualize=False):
         obs, reward, done, env_info = env.step((act1, act2))
         nextState = env.base_env.state
 
+        print(nextState)
+        print()
         agent_pair.observeTransition(state, (act1, act2), nextState, reward)
         total_game_reward += reward
         if reward > 0:
