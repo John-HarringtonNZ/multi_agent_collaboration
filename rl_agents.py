@@ -18,8 +18,8 @@ class RLAgentPair(AgentPair):
 class DecentralizedAgent(RLAgentPair):
 
     def observeTransition(self, state, action, nextState, reward):
-        self.a0.update(self.a0.process_state(state), action, self.a0.process_state(nextState), reward)
-        self.a1.update(self.a1.process_state(state), action, self.a0.process_state(nextState), reward)
+        self.a0.update(self.a0.process_state(state), action[0], self.a0.process_state(nextState), reward)
+        self.a1.update(self.a1.process_state(state), action[1], self.a0.process_state(nextState), reward)
 
     def joint_action(self, state):
         act0 = self.a0.action(self.a0.process_state(state))
@@ -62,13 +62,13 @@ class BasicCommunicationPair(RLAgentPair):
 #TODO: Update with potential feature usage
 class RLAgent(Agent):
 
-    def __init__(self, alpha=0.05, epsilon=0.05, gamma=0.9):
+    def __init__(self, mdp, alpha=0.05, epsilon=0.05, gamma=0.9):
+        Agent.__init__(self)
         self.alpha = float(alpha)
         self.epsilon = float(epsilon)
         self.discount = float(gamma)
-        #self.pair = parentpair
-        #self.index
         self.q_values = util.Counter()
+        self.set_mdp(mdp)
 
     def getQValue(self, state, action):
         return self.q_values[(state, action)]
@@ -191,11 +191,12 @@ class ApproximateQAgent(RLAgent):
        and update.  All other QLearningAgent functions
        should work as is.
     """
-    def __init__(self, mdp, mlam, **args):
-        super().__init__(**args)
+    def __init__(self, idx, mdp, mlam, **args):
+        RLAgent.__init__(self, mdp)
+        self.set_agent_index(idx)
         self.weights = util.Counter()
         self.mmlam = mlam
-        self.mmdp = mdp
+        self.mmdp = mdp #TODO: this should be accessible at self.mdp via inheritance, but isn't...
 
     def getWeights(self):
         return self.weights
@@ -209,15 +210,15 @@ class ApproximateQAgent(RLAgent):
           Should return Q(state,action) = w * featureVector
           where * is the dotProduct operator
         """
-        features, _ = self.mmdp.custom_featurize_state(state, self.mmlam)#self.featExtractor.getFeatures(state, action)
-        print(features)
+        features, _ = self.mmdp.featurize(self.agent_index, state, action, self.mmlam)
         keys = features.keys()
         qval = 0
         for key in keys:
-            print('feature')
+            print('feature', self.agent_index)
             print(key)
             print(features[key])
             qval += (self.weights[key] * features[key])
+        print("---")
         return qval
 
     #TODO: problem is this must be real states not process_state bc pass to getQValue
@@ -227,7 +228,7 @@ class ApproximateQAgent(RLAgent):
         """
         cur_weights = self.getWeights()
 
-        features, _ = self.mmdp.custom_featurize_state(state, self.mmlam)#self.featExtractor.getFeatures(state, action)
+        features, _ = self.mmdp.featurize(self.agent_index, state, action, self.mmlam)
         difference = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state, action)
 
         for feat, val in features.items():
