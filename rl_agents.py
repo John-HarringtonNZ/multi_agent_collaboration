@@ -219,7 +219,7 @@ class ApproximateQAgent(RLAgent):
     def process_state(self, state):
         return state
 
-    #TODO: problem is this must be real state not process_state
+    #Must be real state here, not process_state, because featurize needs the actual state to pull info from
     def getQValue(self, state, action):
         """
           Should return Q(state,action) = w * featureVector
@@ -236,7 +236,7 @@ class ApproximateQAgent(RLAgent):
         #print("---")
         return qval
 
-    #TODO: problem is this must be real states not process_state bc pass to getQValue
+    #Must be real states here, not process_state because pass to getQValue
     def update(self, state, action, nextState, reward):
         """
            Should update your weights based on transition
