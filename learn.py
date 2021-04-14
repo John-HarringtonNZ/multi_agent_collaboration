@@ -40,7 +40,6 @@ def run_episodes(agent_pair, env, num_episodes, num_steps, render=False):
     total_episodes_reward = 0
     for e in range(num_episodes):
         env.reset()
-        print(agent_pair.a0.getWeights())
         print(f"Starting episode {e}, Ave: {total_episodes_reward/(e+1)}")
         agent_pair, e_reward = run_game(agent_pair, env, num_steps, render)
         total_episodes_reward += e_reward

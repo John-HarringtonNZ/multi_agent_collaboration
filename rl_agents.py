@@ -62,13 +62,12 @@ class BasicCommunicationPair(RLAgentPair):
 #TODO: Update with potential feature usage
 class RLAgent(Agent):
 
-    def __init__(self, mdp, alpha=0.05, epsilon=0.05, gamma=0.9):
+    def __init__(self, alpha=0.05, epsilon=0.05, gamma=0.9):
         Agent.__init__(self)
         self.alpha = float(alpha)
         self.epsilon = float(epsilon)
         self.discount = float(gamma)
         self.q_values = util.Counter()
-        self.set_mdp(mdp)
 
     def getQValue(self, state, action):
         return self.q_values[(state, action)]
@@ -192,7 +191,7 @@ class ApproximateQAgent(RLAgent):
        should work as is.
     """
     def __init__(self, idx, mdp, mlam, **args):
-        RLAgent.__init__(self, mdp)
+        super.__init__(self, **args)
         self.set_agent_index(idx)
         self.weights = util.Counter()
         self.mmlam = mlam
@@ -214,11 +213,11 @@ class ApproximateQAgent(RLAgent):
         keys = features.keys()
         qval = 0
         for key in keys:
-            print('feature', self.agent_index)
-            print(key)
-            print(features[key])
+            #print('feature', self.agent_index)
+            #print(key)
+            #print(features[key])
             qval += (self.weights[key] * features[key])
-        print("---")
+        #print("---")
         return qval
 
     #TODO: problem is this must be real states not process_state bc pass to getQValue
