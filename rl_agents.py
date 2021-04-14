@@ -38,21 +38,27 @@ class CentralizedAgent(RLAgentPair):
 
 #RLAgentPair that allows communication between CommunicateAgents
 #TODO:Clean up and complete
-class BasicCommunicationPair(RLAgentPair):
+class CommunicationPair(RLAgentPair):
     #who talks to who
 
     #self.agents = {ind:agent}
+    def __init__(self, *agents):
+        super().__init__(*agents)
+        self.agent_dict = {}
+        for i, a in enumerate(self.agents):
+            self.agent_dict[i] = a
+            a.parent = self
+        self.agents[0].set_other_agent_index(1)
+        self.agents[1].set_other_agent_index(0)
 
     def observeTransition(self, state, action, nextState, reward):
-        print('stub')
-        #self.a0.update(state, action, nextState, reward)
-        #self.a1.update(state, action, nextState, reward)
+        self.a0.update(state, action, nextState, reward)
+        self.a1.update(state, action, nextState, reward)
 
     def joint_action(self, state):
-        #act0 = self.a0.action(state)
-        #act1 = self.a1.action(state)
-        #return (act0, act1)
-        return raiseNotDefined()
+        act0 = self.a0.action(self.a0.process_state(state))
+        act1 = self.a1.action(self.a1.process_state(state))
+        return (act0, act1)
 
     def request_communication(self, agent_index):
         return self.agents[agent_index].communicate()
@@ -62,13 +68,14 @@ class BasicCommunicationPair(RLAgentPair):
 #TODO: Update with potential feature usage
 class RLAgent(Agent):
 
-    def __init__(self, alpha=1.0, epsilon=0.05, gamma=0.9):
+    def __init__(self, alpha=1.0, epsilon=0.05, gamma=0.9, parent=None):
         self.alpha = float(alpha)
         self.epsilon = float(epsilon)
         self.discount = float(gamma)
         #self.pair = parentpair
         #self.index
         self.q_values = util.Counter()
+        self.parent = parent
 
     def getQValue(self, state, action):
         return self.q_values[(state, action)]
@@ -174,10 +181,34 @@ class RLAgent(Agent):
 
 #RLAgent that can request information as well as provide information
 class CommunicateAgent(RLAgent):
+
+
+    def __init__(self, alpha=1.0, epsilon=0.05, gamma=0.9, parent=None):
+        super().__init__()
+        self.other_agent_index = 0
+        self.communicable_information = []
+
+    def set_other_agent_index(self, index):
+        self.other_agent_index = index
+
     #what i say
-    def communicate():
-        return raiseNotDefined()
+    def communicate(self):
+        return self.communicable_information
 
     #request from given agent
     def request_info(self, agent_index):
-        return raiseNotDefined()
+        return self.parent.request_communication(agent_index)
+
+#Agent communicates next expected action
+#Simply concats this to existing state
+class BasicCommunicateAgent(CommunicateAgent):
+
+    #str or features.
+    def process_state(self, state):
+        comm_info = self.request_info(self.other_agent_index)
+        return hash(str(ReducedOvercookedState(state)) + str(comm_info))
+
+    #Update agent and update communicable information with next expected action
+    def update(self, state, action, nextState, reward):
+        super().update(state, action, nextState, reward)
+        self.communicable_information = self.action(nextState)
