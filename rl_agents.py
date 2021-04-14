@@ -17,9 +17,9 @@ class RLAgentPair(AgentPair):
 #RLAgentPair with 2 independent agents 
 class DecentralizedAgent(RLAgentPair):
 
-    def observeTransition(self, state, action, nextState, reward):
-        self.a0.update(self.a0.process_state(state), action[0], self.a0.process_state(nextState), reward)
-        self.a1.update(self.a1.process_state(state), action[1], self.a0.process_state(nextState), reward)
+    def observeTransition(self, state, action, nextState, reward_pair):
+        self.a0.update(self.a0.process_state(state), action[0], self.a0.process_state(nextState), reward_pair[0])
+        self.a1.update(self.a1.process_state(state), action[1], self.a0.process_state(nextState), reward_pair[1])
 
     def joint_action(self, state):
         act0 = self.a0.action(self.a0.process_state(state))
@@ -51,9 +51,9 @@ class CommunicationPair(RLAgentPair):
         self.agents[0].set_other_agent_index(1)
         self.agents[1].set_other_agent_index(0)
 
-    def observeTransition(self, state, action, nextState, reward):
-        self.a0.update(state, action, nextState, reward)
-        self.a1.update(state, action, nextState, reward)
+    def observeTransition(self, state, action_pair, nextState, reward_pair):
+        self.a0.update(state, action_pair[0], nextState, reward_pair[0])
+        self.a1.update(state, action_pair[1], nextState, reward_pair[1])
 
     def joint_action(self, state):
         act0 = self.a0.action(self.a0.process_state(state))
