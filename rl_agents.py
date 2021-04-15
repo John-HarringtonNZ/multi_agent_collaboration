@@ -1,5 +1,5 @@
 from overcooked_ai_py.agents.agent import Agent, AgentPair, AgentFromPolicy
-from overcooked_ai_py.agents.agent import RandomAgent, GreedyHumanModel
+from overcooked_ai_py.agents.agent import RandomAgent, GreedyHumanModel, StayAgent
 from overcooked_ai_py.mdp.actions import Action
 from overcooked_ai_py.mdp.overcooked_mdp import ReducedOvercookedState
 import util, math
@@ -65,6 +65,7 @@ class CommunicationPair(RLAgentPair):
 
     def request_communication(self, agent_index):
         return self.agents[agent_index].communicate()
+
 
 
 #Agent with RL functionality, processes state for Agent use.
@@ -214,6 +215,13 @@ class CommunicateAgent(RLAgent):
     #request from given agent
     def request_info(self, agent_index):
         return self.parent.request_communication(agent_index)
+
+
+class StayRLAgent(RLAgent, StayAgent):
+
+    def action(self, state):
+
+        return 'stay'
 
 
 class ApproximateQAgent(RLAgent):
