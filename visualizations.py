@@ -1,41 +1,23 @@
 import datetime as dt
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import tmp102
 
-# Create figure for plotting
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
-xs = []
-ys = []
 
-# Initialize communication with TMP102
-tmp102.init()
+def get_ave_episode_rewards(ave_episode_dict):
 
-# This function is called periodically from FuncAnimation
-def animate(i, xs, ys):
+    fig, ax = plt.subplots()
 
-    # Read temperature (Celsius) from TMP102
-    temp_c = round(tmp102.read_temp(), 2)
+    for plot_title, rewards in ave_episode_dict.items():
 
-    # Add x and y to lists
-    xs.append(dt.datetime.now().strftime('%H:%M:%S.%f'))
-    ys.append(temp_c)
+        ax.plot(rewards, label=plot_title)
 
-    # Limit x and y lists to 20 items
-    xs = xs[-20:]
-    ys = ys[-20:]
+    ax.set_xlabel('Episodes')
+    ax.set_ylabel('Average Reward')
+    ax.set_title('Average Reward over time for Overcooked Agents')
 
-    # Draw x and y lists
-    ax.clear()
-    ax.plot(xs, ys)
+    return fig
 
-    # Format plot
-    plt.xticks(rotation=45, ha='right')
-    plt.subplots_adjust(bottom=0.30)
-    plt.title('TMP102 Temperature over Time')
-    plt.ylabel('Temperature (deg C)')
+test_dict = {'central':[0,1,1,1,0,10], 'decentral':[0,0,1,1,1,2,3]}
 
-# Set up plot to call animate() function periodically
-ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=1000)
+get_ave_episode_rewards(test_dict)
+
 plt.show()
