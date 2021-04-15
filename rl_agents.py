@@ -42,7 +42,6 @@ class CentralizedAgentPair(RLAgentPair):
 #RLAgentPair that allows communication between CommunicateAgents
 #TODO:Clean up and complete
 class CommunicationPair(RLAgentPair):
-    #who talks to who
 
     #self.agents = {ind:agent}
     def __init__(self, *agents):
@@ -69,7 +68,6 @@ class CommunicationPair(RLAgentPair):
 
 
 #Agent with RL functionality, processes state for Agent use.
-#TODO: Update with potential feature usage
 class RLAgent(Agent):
 
     def __init__(self, alpha=0.05, epsilon=0.05, gamma=0.9, parent=None):
@@ -85,7 +83,6 @@ class RLAgent(Agent):
     def getQValue(self, state, action):
         #if self.q_values[(state, action)] > 0:
             #print('getting prior state info!')
-            
         return self.q_values[(state, action)]
 
     #str or features.
@@ -94,38 +91,31 @@ class RLAgent(Agent):
 
     def computeValueFromQValues(self, state):
         """
-          Returns max_action Q(state,action)
-          where the max is over legal actions.  Note that if
-          there are no legal actions, which is the case at the
-          terminal state, you should return a value of 0.0.
+          Returns max_action Q(state,action) where the
+          max is over legal actions. If at terminal state,
+          return a value of 0.0.
         """
-        "*** YOUR CODE HERE ***"
         actions = self.getLegalActions(state)
-
         if not actions:
-          return 0.0
-
+            # at terminal state
+            return 0.0
         q_values = []
         for a in actions:
-          q_values.append(self.getQValue(state, a))
-
-        #Get the value from all (state, action) combinations
+            #Get the value from all (state, action) combinations
+            q_values.append(self.getQValue(state, a))
         return max(q_values)
 
     def computeActionFromQValues(self, state):
         """
-          Compute the best action to take in a state.  Note that if there
-          are no legal actions, which is the case at the terminal state,
-          you should return None.
+          Compute the best action to take in a state. If at terminal state,
+          return None.
         """
-        "*** YOUR CODE HERE ***"
         actions = self.getLegalActions(state)
         if not actions:
-          return None
-
+            # at terminal state
+            return None
         best_actions = []
         best_q_value = -math.inf
-
         for a in actions:
             action_value = self.getQValue(state, a)
             if action_value > best_q_value:
@@ -133,7 +123,6 @@ class RLAgent(Agent):
                 best_q_value = action_value
             if action_value == best_q_value:
                 best_actions.append(a)
-
         return random.choice(best_actions)     
 
     def getLegalActions(self, state):
@@ -141,32 +130,19 @@ class RLAgent(Agent):
         return Action.ALL_ACTIONS
 
     def action(self, state):
-        """
-        Should return an action, and an action info dictionary.
-        If collecting trajectories of the agent with OvercookedEnv, the action
-        info data will be included in the trajectory data under `ep_infos`.
-
-        This allows agents to optionally store useful information about them
-        in the trajectory for further analysis.
-        """
         legalActions = self.getLegalActions(state)
-
         if util.flipCoin(self.epsilon):
             return random.choice(legalActions)
-
         best_action = self.computeActionFromQValues(state)
-        
         return best_action
         
     def update(self, state, action, nextState, reward):
         """
           The parent class calls this to observe a
           state = action => nextState and reward transition.
-          You should do your Q-Value update here
+          Do Q-Value update here
         """
-        "*** YOUR CODE HERE ***"
         cur_q_val = self.getQValue(state, action)
-
         self.q_values[(state, action)] = cur_q_val + self.alpha * (reward + self.discount*self.getValue(nextState) - cur_q_val)
 
     def getValue(self, state):
@@ -186,9 +162,12 @@ class RLAgent(Agent):
         """
         return NotImplementedError()
 
-#Centralized agent that treats each agent as an arm of a single agent.
+
 class CentralAgent(RLAgent):
-    
+    """
+      Centralized agent that treats each agent as an arm of a single agent.    
+    """
+
     #Returns joint action due to central agent aspect
     def getLegalActions(self, state):
         import itertools
@@ -196,10 +175,10 @@ class CentralAgent(RLAgent):
         return list(itertools.product(single_actions, single_actions))
 
 
-#RLAgent that can request information as well as provide information
 class CommunicateAgent(RLAgent):
-
-
+    """
+      RLAgent that can request information as well as provide information
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.other_agent_index = 0
@@ -208,30 +187,29 @@ class CommunicateAgent(RLAgent):
     def set_other_agent_index(self, index):
         self.other_agent_index = index
 
-    #what i say
+    # What I say
     def communicate(self):
         return self.communicable_information
 
-    #request from given agent
+    # Request from given agent
     def request_info(self, agent_index):
         return self.parent.request_communication(agent_index)
 
 
 class StayRLAgent(RLAgent, StayAgent):
+    """
+      An RLAgent that only stays in same place
+    """
 
     def action(self, state):
-
         return 'stay'
 
 
 class ApproximateQAgent(RLAgent):
     """
-       ApproximateQLearningAgent, similar to PA3
-
-       You should only have to overwrite getQValue
-       and update.  All other QLearningAgent functions
-       should work as is.
+      ApproximateQLearningAgent, similar to PA3
     """
+
     def __init__(self, idx, mdp, mlam, **args):
         super().__init__(**args)
         self.set_agent_index(idx)
@@ -245,27 +223,22 @@ class ApproximateQAgent(RLAgent):
     def process_state(self, state):
         return state
 
-    #Must be real state here, not process_state, because featurize needs the actual state to pull info from
     def getQValue(self, state, action):
         """
-          Should return Q(state,action) = w * featureVector
-          where * is the dotProduct operator
+          Should return Q(state,action) = w * featureVector ;where * is the dotProduct operator
+          Must be real state here, not process_state, because featurize needs the actual state to pull info from
         """
         features, _ = self.mmdp.featurize(self.agent_index, state, action, self.mmlam)
         keys = features.keys()
         qval = 0
         for key in keys:
-            #print('feature', self.agent_index)
-            #print(key)
-            #print(features[key])
             qval += (self.weights[key] * features[key])
-        #print("---")
         return qval
 
-    #Must be real states here, not process_state because pass to getQValue
     def update(self, state, action, nextState, reward):
         """
-           Should update your weights based on transition
+          Should update your weights based on transition
+          Must be real states here, not process_state because pass to getQValue
         """
         cur_weights = self.getWeights()
 
@@ -275,9 +248,12 @@ class ApproximateQAgent(RLAgent):
         for feat, val in features.items():
             self.getWeights()[feat] = cur_weights[feat] + (self.alpha * difference * val)
 
-#Agent communicates next expected action
-#Simply concats this to existing state
+
 class BasicCommunicateAgent(CommunicateAgent):
+    """
+      Agent communicates next expected action
+      (Simply concats this to existing state)
+    """
 
     #str or features.
     def process_state(self, state):
