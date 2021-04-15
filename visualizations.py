@@ -14,10 +14,14 @@ def get_ave_episode_rewards(ave_episode_dict):
     ax.set_ylabel('Average Reward')
     ax.set_title('Average Reward over time for Overcooked Agents')
 
+    plt.savefig('testing_agents.png')
+
     return fig
 
 test_dict = {'central':[0,1,1,1,0,10], 'decentral':[0,0,1,1,1,2,3]}
 
 get_ave_episode_rewards(test_dict)
+
+plt.savefig('filename')
 
 plt.show()

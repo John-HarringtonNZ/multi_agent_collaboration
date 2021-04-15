@@ -78,10 +78,13 @@ class RLAgent(Agent):
         self.q_values = util.Counter()
         self.parent = parent
 
+    def reset_q_values(self):
+        self.q_values = util.Counter()
+
     def getQValue(self, state, action):
-        if self.q_values[(state, action)] > 0:
+        #if self.q_values[(state, action)] > 0:
             #print('getting prior state info!')
-            continue
+            
         return self.q_values[(state, action)]
 
     #str or features.
