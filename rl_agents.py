@@ -29,12 +29,15 @@ class DecentralizedAgent(RLAgentPair):
 #RLAgentPair that acts as single agent, each joint action is really one. 
 #self.a1 is dummy agent
 #TODO: Complete
-class CentralizedAgent(RLAgentPair):
+class CentralizedAgentPair(RLAgentPair):
 
-    def stub():
-        print('abc')
-    #self.a0 is actual agent
-    #self.a1 is dummy?
+    def observeTransition(self, state, action, nextState, reward_pair):
+        self.a0.update(self.a0.process_state(state), action, self.a0.process_state(nextState), reward_pair[0]+reward_pair[1])
+
+    def joint_action(self, state):
+        act0 = self.a0.action(self.a0.process_state(state))
+        return act0
+
 
 #RLAgentPair that allows communication between CommunicateAgents
 #TODO:Clean up and complete
@@ -76,6 +79,9 @@ class RLAgent(Agent):
         self.parent = parent
 
     def getQValue(self, state, action):
+        if self.q_values[(state, action)] > 0:
+            #print('getting prior state info!')
+            continue
         return self.q_values[(state, action)]
 
     #str or features.
@@ -175,6 +181,15 @@ class RLAgent(Agent):
             [(action, action_info), (action, action_info), ...]: the actions and action infos for each state-agent_index pair
         """
         return NotImplementedError()
+
+#Centralized agent that treats each agent as an arm of a single agent.
+class CentralAgent(RLAgent):
+    
+    #Returns joint action due to central agent aspect
+    def getLegalActions(self, state):
+        import itertools
+        single_actions = super().getLegalActions(state) 
+        return list(itertools.product(single_actions, single_actions))
 
 
 #RLAgent that can request information as well as provide information
