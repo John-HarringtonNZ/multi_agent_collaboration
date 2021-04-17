@@ -210,12 +210,11 @@ class ApproximateQAgent(RLAgent):
       ApproximateQLearningAgent, similar to PA3
     """
 
-    def __init__(self, idx, mdp, mlam, **args):
+    def __init__(self, idx, mlam, **args):
         super().__init__(**args)
         self.set_agent_index(idx)
         self.weights = util.Counter()
         self.mmlam = mlam
-        self.mmdp = mdp #TODO: this should be accessible at self.mdp via inheritance, but isn't...
 
     def getWeights(self):
         return self.weights
@@ -228,7 +227,7 @@ class ApproximateQAgent(RLAgent):
           Should return Q(state,action) = w * featureVector ;where * is the dotProduct operator
           Must be real state here, not process_state, because featurize needs the actual state to pull info from
         """
-        features, _ = self.mmdp.featurize(self.agent_index, state, action, self.mmlam)
+        features, _ = self.mdp.featurize(self.agent_index, state, action, self.mmlam)
         keys = features.keys()
         qval = 0
         for key in keys:
@@ -242,7 +241,7 @@ class ApproximateQAgent(RLAgent):
         """
         cur_weights = self.getWeights()
 
-        features, _ = self.mmdp.featurize(self.agent_index, state, action, self.mmlam)
+        features, _ = self.mdp.featurize(self.agent_index, state, action, self.mmlam)
         difference = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state, action)
 
         for feat, val in features.items():

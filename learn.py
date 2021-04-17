@@ -16,6 +16,8 @@ def run_game(agent_pair, env, num_steps, shouldUseIntermediateRewards=False, ren
 
         state = env.base_env.state
 
+        #import pdb
+        #pdb.set_trace()
         act1, act2 = agent_pair.joint_action(state)
         obs, reward, done, env_info = env.step((act1, act2))
 
@@ -64,6 +66,7 @@ def run_episodes_arr(agent_pair, env, num_episodes, num_steps, seed, render=Fals
     average_game_reward = 0
     total_episodes_reward = 0
     rewards = []
+
     for e in range(num_episodes):
         env.reset()
         print(f"Starting episode {e}, Ave: {total_episodes_reward/(e+1)}")
