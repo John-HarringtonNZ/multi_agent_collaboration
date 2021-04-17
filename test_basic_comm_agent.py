@@ -1,11 +1,10 @@
 import learn
-
 import gym
 from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
 from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
 from overcooked_ai_py.planning.planners import MediumLevelActionManager, NO_COUNTERS_PARAMS
-from overcooked_ai_py.agents.agent import RandomAgent, AgentPair
-from rl_agents import DecentralizedAgent, RLAgent, BasicCommunicateAgent, CommunicationPair
+from overcooked_ai_py.agents.agent import RandomAgent
+from rl_agents import BasicCommunicateAgent, CommunicationPair
 
 mdp = OvercookedGridworld.from_layout_name("cramped_room")
 #Other potentially interesting layouts: forced_coordination

@@ -1,5 +1,6 @@
 from util import *
 from overcooked_ai_py.agents.agent import Agent, AgentPair, AgentFromPolicy
+import numpy as np
 
 class ValueEstimationAgent(Agent):
     """
@@ -206,30 +207,11 @@ class ReinforcementAgent(ValueEstimationAgent):
 
 
 class QLearningAgent(ReinforcementAgent):
-    """
-      Q-Learning Agent
 
-      Functions you should fill in:
-        - computeValueFromQValues
-        - computeActionFromQValues
-        - getQValue
-        - getAction
-        - update
-
-      Instance variables you have access to
-        - self.epsilon (exploration prob)
-        - self.alpha (learning rate)
-        - self.discount (discount rate)
-
-      Functions you should use
-        - self.getLegalActions(state)
-          which returns legal actions for a state
-    """
     def __init__(self, **args):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
 
-        "*** YOUR CODE HERE ***"
         self.q_values = util.Counter()
 
 
@@ -239,7 +221,6 @@ class QLearningAgent(ReinforcementAgent):
           Should return 0.0 if we have never seen a state
           or the Q node value otherwise
         """
-        "*** YOUR CODE HERE ***"
         #Q_val = Start in s, take action a to nextState, then follow policy afterwards.
         return self.q_values[(state, action)]
 
@@ -251,7 +232,6 @@ class QLearningAgent(ReinforcementAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return a value of 0.0.
         """
-        "*** YOUR CODE HERE ***"
         actions = self.getLegalActions(state)
 
         if not actions:
@@ -270,7 +250,6 @@ class QLearningAgent(ReinforcementAgent):
           are no legal actions, which is the case at the terminal state,
           you should return None.
         """
-        "*** YOUR CODE HERE ***"
         actions = self.getLegalActions(state)
 
         if not actions:
@@ -287,7 +266,7 @@ class QLearningAgent(ReinforcementAgent):
             if action_value == best_q_value:
                 best_actions.append(a)
 
-        return random.choice(best_actions)     
+        return np.random.choice(best_actions)     
 
     def getAction(self, state):
         """
@@ -306,9 +285,8 @@ class QLearningAgent(ReinforcementAgent):
         if not legalActions:
           return None
 
-        "*** YOUR CODE HERE ***"
         if util.flipCoin(self.epsilon):
-            return random.choice(legalActions)
+            return np.random.choice(legalActions)
 
         best_action = self.computeActionFromQValues(state)
         return best_action
@@ -322,7 +300,6 @@ class QLearningAgent(ReinforcementAgent):
           NOTE: You should never call this function,
           it will be called on your behalf
         """
-        "*** YOUR CODE HERE ***"
         cur_q_val = self.getQValue(state, action)
 
         self.q_values[(state, action)] = cur_q_val + self.alpha * (reward + self.discount*self.getValue(nextState) - cur_q_val)

@@ -174,7 +174,7 @@ class CentralAgent(RLAgent):
         single_actions = super().getLegalActions(state) 
         return list(itertools.product(single_actions, single_actions))
 
-
+#Abstract RLAgent that can request and provide information to other agents
 class CommunicateAgent(RLAgent):
     """
       RLAgent that can request information as well as provide information
@@ -196,6 +196,7 @@ class CommunicateAgent(RLAgent):
         return self.parent.request_communication(agent_index)
 
 
+#This agent is a dummy agent that works within the RLAgent Hierarchy
 class StayRLAgent(RLAgent, StayAgent):
     """
       An RLAgent that only stays in same place
@@ -248,6 +249,7 @@ class ApproximateQAgent(RLAgent):
             self.getWeights()[feat] = cur_weights[feat] + (self.alpha * difference * val)
 
 
+#Implementation of Communication Agent, looks at other agents future actions (1 step ahead)
 class BasicCommunicateAgent(CommunicateAgent):
     """
       Agent communicates next expected action

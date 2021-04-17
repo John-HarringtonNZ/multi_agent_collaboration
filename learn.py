@@ -48,7 +48,7 @@ def run_episodes(agent_pair, env, num_episodes, num_steps, render=False):
     total_episodes_reward = 0
     rewards = []
     for e in range(num_episodes):
-        env.reset()
+        env.reset(regen_mdp=False)
         print(f"Starting episode {e}, Ave: {total_episodes_reward/(e+1)}")
         agent_pair, e_reward = run_game(agent_pair, env, num_steps, render=render)
         total_episodes_reward += e_reward
@@ -68,7 +68,7 @@ def run_episodes_arr(agent_pair, env, num_episodes, num_steps, seed, render=Fals
     rewards = []
 
     for e in range(num_episodes):
-        env.reset()
+        env.reset(regen_mdp=False)
         print(f"Starting episode {e}, Ave: {total_episodes_reward/(e+1)}")
         agent_pair, e_reward = run_game(agent_pair, env, num_steps, render)
         total_episodes_reward += e_reward
