@@ -58,5 +58,5 @@ num_episodes = 1000
 for name, agent in agent_names.items():
     results[name] = get_avg_rewards(agent, num_episodes)
 
-from visualizations import get_ave_episode_rewards
-get_ave_episode_rewards(results)
+from visualizations import *
+windowed_average_plot(results, figure_title='agent_comparison')
