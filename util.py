@@ -59,6 +59,9 @@ class Counter(dict):
         for key in keys:
             self[key] += count
 
+    def contains(self,key):
+        return True if key in self else False
+
     def argMax(self):
         """
         Returns the key with the highest value.

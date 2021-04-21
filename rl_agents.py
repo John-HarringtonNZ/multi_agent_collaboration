@@ -70,7 +70,7 @@ class CommunicationPair(RLAgentPair):
 #Agent with RL functionality, processes state for Agent use.
 class RLAgent(Agent):
 
-    def __init__(self, alpha=0.05, epsilon=0.05, gamma=0.9, parent=None):
+    def __init__(self, alpha=0.2, epsilon=0.05, gamma=0.9, parent=None):
         self.alpha = float(alpha)
         self.epsilon = float(epsilon)
         self.discount = float(gamma)

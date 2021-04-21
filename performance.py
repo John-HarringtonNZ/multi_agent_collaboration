@@ -20,11 +20,11 @@ def get_avg_rewards(a_pair, num_episodes, num_steps = 1000, seeds=[123,456,999,1
 
     total_reward = [sum(x) for x in zip(*rewards)]
     ave_reward = [x/len(seeds) for x in total_reward]
-    print(ave_reward)
+
     return ave_reward
 ###############################################
 
-mdp = OvercookedGridworld.from_layout_name("cramped_room")
+mdp = OvercookedGridworld.from_layout_name("4100_isolated")
 #Other potentially interesting layouts: forced_coordination
 base_env = OvercookedEnv.from_mdp(mdp)
 env = gym.make('Overcooked-v0')
@@ -54,9 +54,9 @@ approx_agent.set_mdp(mdp)
 agent_names['Approximate Q Agent'] = approx_agent
 
 results = {}
-num_episodes = 1000
+num_episodes = 100
 for name, agent in agent_names.items():
-    results[name] = get_avg_rewards(agent, num_episodes)
+    results[name] = get_avg_rewards(agent, num_episodes, num_steps=300)
 
 from visualizations import *
 windowed_average_plot(results, figure_title='agent_comparison')
