@@ -4,32 +4,17 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
-#Create Overcooked Environment:
-from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
-from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
-from overcooked_ai_py.agents.agent import AgentPair, StayAgent
-
-mdp = OvercookedGridworld.from_layout_name("4100_handoff")
-#Other potentially interesting layouts: forced_coordination
-base_env = OvercookedEnv.from_mdp(mdp)
-env = gym.make('Overcooked-v0')
-env.custom_init(base_env, base_env.mdp.flatten_state, display=True)
-
 # Configuration parameters for the whole setup
-#seed = 42
+seed = 42
 gamma = 0.99  # Discount factor for past rewards
-max_steps_per_episode = 1000
-#env = gym.make("CartPole-v0")  # Create the environment
-#env.seed(seed)
-#State is numpy.ndarray
+max_steps_per_episode = 10000
+env = gym.make("CartPole-v0")  # Create the environment
+env.seed(seed)
 eps = np.finfo(np.float32).eps.item()  # Smallest number such that 1.0 + eps != 1.0
 
-num_single_actions = 6
-num_inputs = 214
-num_actions = num_single_actions^2
-num_hidden = 100
-
-epsilon = 0.2
+num_inputs = 4
+num_actions = 2
+num_hidden = 128
 
 inputs = layers.Input(shape=(num_inputs,))
 common = layers.Dense(num_hidden, activation="relu")(inputs)
@@ -48,13 +33,11 @@ running_reward = 0
 episode_count = 0
 
 while True:  # Run until solved
-    state, _ = env.reset(regen_mdp=False)
-
+    state = env.reset()
     episode_reward = 0
     with tf.GradientTape() as tape:
         for timestep in range(1, max_steps_per_episode):
-            #print(f"{timestep}/{max_steps_per_episode}")
-            #env.render() #; Adding this line would show the attempts
+            # env.render(); Adding this line would show the attempts
             # of the agent in a pop up window.
 
             state = tf.convert_to_tensor(state)
@@ -67,21 +50,10 @@ while True:  # Run until solved
 
             # Sample action from action probability distribution
             action = np.random.choice(num_actions, p=np.squeeze(action_probs))
-            action_1, action_2 = action // num_single_actions, action % num_single_actions
-
-            if np.random.rand() < epsilon:
-                action_1, action_2 = np.random.randint(low=0, high=num_single_actions, size=2)
-
             action_probs_history.append(tf.math.log(action_probs[0, action]))
 
             # Apply the sampled action in our environment
-            _, reward, done, _ = env.step((action_1, action_2))
-
-            if reward > 0:
-                print('got reward!')
-
-            state = env.featurize_fn(env.base_env.state)[0]       
-
+            state, reward, done, _ = env.step(action)
             rewards_history.append(reward)
             episode_reward += reward
 

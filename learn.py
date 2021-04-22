@@ -12,7 +12,7 @@ def run_game(agent_pair, env, num_steps, shouldUseIntermediateRewards=False, ren
     for t in range(num_steps):
         if render:  
             env.render()
-            time.sleep(0.1)
+            #time.sleep(0.1)
 
         state = env.base_env.state
 
