@@ -14,19 +14,20 @@ mdp = OvercookedGridworld.from_layout_name("4100_handoff")
 base_env = OvercookedEnv.from_mdp(mdp)
 env = gym.make('Overcooked-v0')
 env.custom_init(base_env, base_env.mdp.flatten_state, display=True)
+input_size = env.featurize_fn(env.base_env.state)[0].shape
 
 # Configuration parameters for the whole setup
 #seed = 42
 gamma = 0.99  # Discount factor for past rewards
-max_steps_per_episode = 1000
+max_steps_per_episode = 100
 #env = gym.make("CartPole-v0")  # Create the environment
 #env.seed(seed)
 #State is numpy.ndarray
 eps = np.finfo(np.float32).eps.item()  # Smallest number such that 1.0 + eps != 1.0
 
 num_single_actions = 6
-num_inputs = 214
-num_actions = num_single_actions^2
+num_inputs = input_size[0]
+num_actions = 36
 num_hidden = 100
 
 epsilon = 0.2
@@ -47,6 +48,7 @@ rewards_history = []
 running_reward = 0
 episode_count = 0
 
+
 while True:  # Run until solved
     state, _ = env.reset(regen_mdp=False)
 
@@ -54,7 +56,8 @@ while True:  # Run until solved
     with tf.GradientTape() as tape:
         for timestep in range(1, max_steps_per_episode):
             #print(f"{timestep}/{max_steps_per_episode}")
-            #env.render() #; Adding this line would show the attempts
+            #env.render() 
+            #; Adding this line would show the attempts
             # of the agent in a pop up window.
 
             state = tf.convert_to_tensor(state)
@@ -66,11 +69,16 @@ while True:  # Run until solved
             critic_value_history.append(critic_value[0, 0])
 
             # Sample action from action probability distribution
+            #print(action_probs)
+            #print(critic_value)
             action = np.random.choice(num_actions, p=np.squeeze(action_probs))
+            #print(action)
             action_1, action_2 = action // num_single_actions, action % num_single_actions
 
-            if np.random.rand() < epsilon:
-                action_1, action_2 = np.random.randint(low=0, high=num_single_actions, size=2)
+            #print((action_1, action_2))
+
+            #if np.random.rand() < epsilon:
+            #    action_1, action_2 = np.random.randint(low=0, high=num_single_actions, size=2)
 
             action_probs_history.append(tf.math.log(action_probs[0, action]))
 
