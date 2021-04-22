@@ -70,7 +70,7 @@ def run_episodes_arr(agent_pair, env, num_episodes, num_steps, seed, render=Fals
     for e in range(num_episodes):
         env.reset(regen_mdp=False)
         print(f"Starting episode {e}, Ave: {total_episodes_reward/(e+1)}")
-        agent_pair, e_reward = run_game(agent_pair, env, num_steps, render)
+        agent_pair, e_reward = run_game(agent_pair, env, num_steps, render=render)
         total_episodes_reward += e_reward
         rewards.append(e_reward)
 
