@@ -17,7 +17,9 @@ env.custom_init(base_env, base_env.mdp.flatten_state, display=True)
 input_size = env.featurize_fn(env.base_env.state)[0].shape
 
 # Configuration parameters for the whole setup
-#seed = 42
+seed = 42
+np.random.seed(seed)
+tf.random.set_seed(seed)
 gamma = 0.99  # Discount factor for past rewards
 max_steps_per_episode = 100
 #env = gym.make("CartPole-v0")  # Create the environment
@@ -48,6 +50,14 @@ rewards_history = []
 running_reward = 0
 episode_count = 0
 
+#Add shape function to modify rewards
+custom_sparse_rewards = {
+    'deliver_soup': 0,
+    'add_onion_to_pot': 100,
+    'pickup_onion': 1
+}
+mdp.set_sparse_rewards(custom_sparse_rewards)
+
 
 while True:  # Run until solved
     state, _ = env.reset(regen_mdp=False, return_only_state=True)
@@ -56,7 +66,7 @@ while True:  # Run until solved
     with tf.GradientTape() as tape:
         for timestep in range(1, max_steps_per_episode):
             #print(f"{timestep}/{max_steps_per_episode}")
-            #env.render() 
+            env.render() 
             #; Adding this line would show the attempts
             # of the agent in a pop up window.
 
@@ -72,6 +82,7 @@ while True:  # Run until solved
             #print(action_probs)
             #print(critic_value)
             action = np.random.choice(num_actions, p=np.squeeze(action_probs))
+            #print("Action:")
             #print(action)
             action_1, action_2 = action // num_single_actions, action % num_single_actions
 
@@ -87,6 +98,8 @@ while True:  # Run until solved
 
             if reward > 0:
                 print('got reward!')
+            if reward == 30:
+                print('completed task!')
 
             state = env.featurize_fn(env.base_env.state)[0]       
 
