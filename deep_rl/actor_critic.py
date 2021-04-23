@@ -50,7 +50,7 @@ episode_count = 0
 
 
 while True:  # Run until solved
-    state, _ = env.reset(regen_mdp=False)
+    state, _ = env.reset(regen_mdp=False, return_only_state=True)
 
     episode_reward = 0
     with tf.GradientTape() as tape:
@@ -83,7 +83,7 @@ while True:  # Run until solved
             action_probs_history.append(tf.math.log(action_probs[0, action]))
 
             # Apply the sampled action in our environment
-            _, reward, done, _ = env.step((action_1, action_2))
+            _, reward, done, _ = env.step((action_1, action_2), action_as_ind=True)
 
             if reward > 0:
                 print('got reward!')
