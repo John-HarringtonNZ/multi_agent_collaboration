@@ -43,7 +43,10 @@ def run_game(agent_pair, env, num_steps, shouldUseIntermediateRewards=False, ren
 
     return (agent_pair, total_game_reward)
 
-def run_episodes(agent_pair, env, num_episodes, num_steps, render=False):
+def run_episodes(agent_pair, env, num_episodes, num_steps, seed=None, render=False):
+    if seed:
+        random.seed(seed)
+        numpy.random.seed(seed)
     average_game_reward = 0
     total_episodes_reward = 0
     rewards = []
@@ -60,13 +63,13 @@ def run_episodes(agent_pair, env, num_episodes, num_steps, render=False):
     return agent_pair, ave_reward
 
 
-def run_episodes_arr(agent_pair, env, num_episodes, num_steps, seed, render=False):
-    random.seed(seed)
-    numpy.random.seed(seed)
+def run_episodes_arr(agent_pair, env, num_episodes, num_steps, seed=None, render=False):
+    if seed:
+        random.seed(seed)
+        numpy.random.seed(seed)
     average_game_reward = 0
     total_episodes_reward = 0
     rewards = []
-
     for e in range(num_episodes):
         env.reset(regen_mdp=False)
         print(f"Starting episode {e}, Ave: {total_episodes_reward/(e+1)}")
