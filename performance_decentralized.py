@@ -56,7 +56,7 @@ decentral_agent = DecentralizedAgent(a1, a2)
 agent_names['Decentralized Agent'] = decentral_agent
 
 results = {}
-num_episodes = 30
+num_episodes = 100
 results['Decentralized Agent'], q_val_counts = get_avg_rewards_and_qs(decentral_agent, num_episodes, num_steps=300)
 
 q_counts_a0 = q_val_counts[0]
