@@ -5,7 +5,7 @@ import time, random, numpy
 from overcooked_ai_py.planning.planners import MediumLevelActionManager, NO_COUNTERS_PARAMS
 from overcooked_ai_py.agents.agent import RandomAgent, GreedyHumanModel, AgentPair
 
-def run_game(agent_pair, env, num_steps, shouldUseIntermediateRewards=False, render=False, visualize=False):
+def run_game(agent_pair, env, num_steps, shouldUseIntermediateRewards=False, render=False):
 
     total_game_reward = 0
 

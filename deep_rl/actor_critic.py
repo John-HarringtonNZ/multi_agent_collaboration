@@ -52,7 +52,7 @@ episode_count = 0
 
 #Add shape function to modify rewards
 custom_sparse_rewards = {
-    'deliver_soup': 0,
+    'deliver_soup': 10000,
     'add_onion_to_pot': 100,
     'pickup_onion': 1
 }
@@ -96,8 +96,8 @@ while True:  # Run until solved
             # Apply the sampled action in our environment
             _, reward, done, _ = env.step((action_1, action_2), action_as_ind=True)
 
-            if reward > 0:
-                print('got reward!')
+            #if reward > 0:
+            #    print('got reward!')
             if reward == 30:
                 print('completed task!')
 
