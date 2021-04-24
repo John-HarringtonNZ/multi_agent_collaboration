@@ -26,6 +26,9 @@ class DecentralizedAgent(RLAgentPair):
         act1 = self.a1.action(self.a1.process_state(state))
         return (act0, act1)
 
+    def getNumQVals(self):
+        return (self.a0.getNumQVals(), self.a1.getNumQVals())
+
 #RLAgentPair that acts as single agent, each joint action is really one. 
 #self.a1 is dummy agent
 #TODO: Complete
@@ -79,6 +82,9 @@ class RLAgent(Agent):
 
     def reset_q_values(self):
         self.q_values = util.Counter()
+
+    def getNumQVals(self):
+        return len(self.q_values)
 
     def getQValue(self, state, action):
         #if self.q_values[(state, action)] > 0:
