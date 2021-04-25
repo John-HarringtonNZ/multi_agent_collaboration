@@ -12,7 +12,12 @@ env = gym.make('Overcooked-v0')
 env.custom_init(base_env, base_env.featurize_state_mdp, display=True)
 
 mlam = MediumLevelActionManager.from_pickle_or_compute(mdp, NO_COUNTERS_PARAMS, force_compute=False)
-
+custom_sparse_rewards = {
+    'deliver_soup': 10000,
+    'add_onion_to_pot': 100,
+    'pickup_onion': 1
+}
+mdp.set_sparse_rewards(custom_sparse_rewards)
 q_agent_1 = ApproximateQAgent(0, mlam=mlam)
 q_agent_2 = ApproximateQAgent(1, mlam=mlam)
 central_agent = DecentralizedAgent(q_agent_1, q_agent_2)

@@ -15,7 +15,7 @@ def get_avg_rewards(a_pair, num_episodes, num_steps = 1000, seeds=[123,456,999,1
         a_pair.a0.reset_q_values()
         a_pair.a1.reset_q_values()
 
-        _, rew = learn.run_episodes_arr(a_pair, env, num_episodes, num_steps, s, False)
+        _, rew = learn.run_episodes_arr(a_pair, env, num_episodes, num_steps, s, render=True)
         rewards.append(rew)
 
     total_reward = [sum(x) for x in zip(*rewards)]
@@ -32,7 +32,7 @@ def get_avg_rewards_and_qs(decentralized_agent_pair, num_episodes, num_steps = 1
         decentralized_agent_pair.a0.reset_q_values()
         decentralized_agent_pair.a1.reset_q_values()
 
-        _, rew, q_counts = learn.run_episodes_arr_q(decentralized_agent_pair, env, num_episodes, num_steps, s, False)
+        _, rew, q_counts = learn.run_episodes_arr_q(decentralized_agent_pair, env, num_episodes, num_steps, s, render=True)
         q_val_counts_a0 = [x[0] for x in q_counts]
         q_val_counts_a1 = [x[1] for x in q_counts]
 
