@@ -81,18 +81,20 @@ while True:  # Run until solved
             # Sample action from action probability distribution
             #print(action_probs)
             #print(critic_value)
-            print(action_probs)
-            action = np.random.choice(num_actions, p=np.squeeze(action_probs))
+            sqzd1 = np.squeeze(action_probs[0])
+            sqzd2 = np.squeeze(action_probs[1])
+            action1 = np.random.choice(num_actions, p=sqzd1)
+            action2 = np.random.choice(num_actions, p=sqzd2)
             #print("Action:")
             #print(action)
-            action_1, action_2 = action // num_single_actions, action % num_single_actions
+            #action_1, action_2 = action // num_single_actions, action % num_single_actions
 
             #print((action_1, action_2))
 
             #if np.random.rand() < epsilon:
             #    action_1, action_2 = np.random.randint(low=0, high=num_single_actions, size=2)
 
-            action_probs_history.append(tf.math.log(action_probs[0, action]))
+            action_probs_history.append(tf.math.log(action_probs[0][0, action1]), tf.math.log(action_probs[1][0, action2]))
 
             # Apply the sampled action in our environment
             _, reward, done, _ = env.step((action_1, action_2), action_as_ind=True)
