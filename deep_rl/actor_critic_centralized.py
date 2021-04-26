@@ -53,7 +53,7 @@ episode_count = 0
 
 #Add shape function to modify rewards
 custom_sparse_rewards = {
-    'deliver_soup': 0,
+    'deliver_soup': 10000,
     'add_onion_to_pot': 100,
     'pickup_onion': 1
 }

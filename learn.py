@@ -5,7 +5,7 @@ import time, random, numpy
 from overcooked_ai_py.planning.planners import MediumLevelActionManager, NO_COUNTERS_PARAMS
 from overcooked_ai_py.agents.agent import RandomAgent, GreedyHumanModel, AgentPair
 
-def run_game(agent_pair, env, num_steps, shouldUseIntermediateRewards=False, render=False, visualize=False):
+def run_game(agent_pair, env, num_steps, shouldUseIntermediateRewards=False, render=False):
 
     total_game_reward = 0
 
@@ -82,3 +82,23 @@ def run_episodes_arr(agent_pair, env, num_episodes=100, num_steps=100, seed=None
     #print("Rewards:", rewards)
     return agent_pair, rewards
 
+def run_episodes_arr_q(agent_pair, env, num_episodes, num_steps, seed=None, render=False):
+    if seed:
+        random.seed(seed)
+        numpy.random.seed(seed)
+    average_game_reward = 0
+    total_episodes_reward = 0
+    q_counts = []
+    rewards = []
+    for e in range(num_episodes):
+        env.reset(regen_mdp=False)
+        print(f"Starting episode {e}, Ave: {total_episodes_reward/(e+1)}")
+        agent_pair, e_reward = run_game(agent_pair, env, num_steps, render=render)
+        total_episodes_reward += e_reward
+        rewards.append(e_reward)
+        q_counts.append(agent_pair.getNumQVals())
+
+    ave_reward = total_episodes_reward / num_episodes
+    #print(f"Average reward: {ave_reward}")
+    #print("Rewards:", rewards)
+    return agent_pair, rewards, q_counts
