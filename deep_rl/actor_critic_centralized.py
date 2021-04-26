@@ -9,7 +9,7 @@ from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
 from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
 from overcooked_ai_py.agents.agent import AgentPair, StayAgent
 
-mdp = OvercookedGridworld.from_layout_name("4100_handoff")
+mdp = OvercookedGridworld.from_layout_name("cramped_room")
 #Other potentially interesting layouts: forced_coordination
 base_env = OvercookedEnv.from_mdp(mdp)
 env = gym.make('Overcooked-v0')
@@ -99,7 +99,7 @@ while True:  # Run until solved
             _, reward, done, _ = env.step((action_1, action_2), action_as_ind=True)
 
             if reward > 0:
-                print('got reward!')
+                print(f'got reward: {reward}')
             if reward == 30:
                 print('completed task!')
 

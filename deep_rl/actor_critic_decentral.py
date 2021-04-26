@@ -74,7 +74,7 @@ while True:  # Run until solved
     with tf.GradientTape(persistent=True) as tape:
         for timestep in range(1, max_steps_per_episode):
             #print(f"{timestep}/{max_steps_per_episode}")
-            env.render() 
+            #env.render() 
             #; Adding this line would show the attempts
             # of the agent in a pop up window.
 

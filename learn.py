@@ -63,7 +63,7 @@ def run_episodes(agent_pair, env, num_episodes, num_steps, seed=None, render=Fal
     return agent_pair, ave_reward
 
 
-def run_episodes_arr(agent_pair, env, num_episodes, num_steps, seed=None, render=False):
+def run_episodes_arr(agent_pair, env, num_episodes=100, num_steps=100, seed=None, render=False):
     if seed:
         random.seed(seed)
         numpy.random.seed(seed)
