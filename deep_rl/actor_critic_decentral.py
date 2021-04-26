@@ -17,11 +17,12 @@ env.custom_init(base_env, base_env.mdp.flatten_state, display=True)
 input_size = env.featurize_fn(env.base_env.state)[0].shape
 
 # Configuration parameters for the whole setup
-#seed = 42
+seed = np.random.randint(100000)
+print(f"Seed: {seed}")
 #np.random.seed(seed)
 #tf.random.set_seed(seed)
 gamma = 0.99  # Discount factor for past rewards
-max_steps_per_episode = 100
+max_steps_per_episode = 200
 #env = gym.make("CartPole-v0")  # Create the environment
 #env.seed(seed)
 #State is numpy.ndarray
@@ -85,21 +86,12 @@ while True:  # Run until solved
             actions = [None] * num_agents
             action_probs = [None] * num_agents
             critic_value = [None] * num_agents
-
             for i in range(num_agents):
                 action_probs[i], critic_value[i] = models[i](state)
                 critic_value_history[i].append(critic_value[i][0, 0])
+                # Sample action from action probability distribution
                 actions[i] = np.random.choice(num_actions, p=np.squeeze(action_probs[i]))
-                #print('test')
-                #print(actions[i])
-                #print(action_probs[i][0, :])
-                #print(action_probs[i][0, actions[i]])
                 action_probs_history[i].append(tf.math.log(action_probs[i][0, actions[i]]))
-
-            # Sample action from action probability distribution
-            
-            #print("Actions:")
-            #print(actions)
 
             # Apply the sampled action in our environment
             _, reward, done, _ = env.step(tuple(actions), action_as_ind=True)
