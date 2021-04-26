@@ -17,9 +17,9 @@ env.custom_init(base_env, base_env.mdp.flatten_state, display=True)
 input_size = env.featurize_fn(env.base_env.state)[0].shape
 
 # Configuration parameters for the whole setup
-seed = 42
-np.random.seed(seed)
-tf.random.set_seed(seed)
+#seed = 42
+#np.random.seed(seed)
+#tf.random.set_seed(seed)
 gamma = 0.99  # Discount factor for past rewards
 max_steps_per_episode = 100
 #env = gym.make("CartPole-v0")  # Create the environment
@@ -29,23 +29,30 @@ eps = np.finfo(np.float32).eps.item()  # Smallest number such that 1.0 + eps != 
 
 num_single_actions = 6
 num_inputs = input_size[0]
-num_actions = num_single_actions ** 2
+num_actions = num_single_actions
 num_hidden = 100
 
 epsilon = 0.2
 
 inputs = layers.Input(shape=(num_inputs,))
 common = layers.Dense(num_hidden, activation="relu")(inputs)
-action = layers.Dense(num_actions, activation="softmax")(common)
+common_2 = layers.Dense(num_hidden, activation="relu")(common)
+action = layers.Dense(num_actions, activation="softmax")(common_2)
 critic = layers.Dense(1)(common)
 
-model = keras.Model(inputs=inputs, outputs=[action, critic])
+num_agents = 2
+models = [None] * num_agents
+action_probs_history = [None] * num_agents
+critic_value_history = [None] * num_agents
+
+for i in range(num_agents):
+    models[i] = keras.Model(inputs=inputs, outputs=[action, critic])
+    action_probs_history[i] = []
+    critic_value_history[i] = []
 
 
 optimizer = keras.optimizers.Adam(learning_rate=0.01)
 huber_loss = keras.losses.Huber()
-action_probs_history = []
-critic_value_history = []
 rewards_history = []
 running_reward = 0
 episode_count = 0
@@ -63,7 +70,7 @@ while True:  # Run until solved
     state, _ = env.reset(regen_mdp=False, return_only_state=True)
 
     episode_reward = 0
-    with tf.GradientTape() as tape:
+    with tf.GradientTape(persistent=True) as tape:
         for timestep in range(1, max_steps_per_episode):
             #print(f"{timestep}/{max_steps_per_episode}")
             env.render() 
@@ -75,30 +82,30 @@ while True:  # Run until solved
 
             # Predict action probabilities and estimated future rewards
             # from environment state
-            action_probs, critic_value = model(state)
-            critic_value_history.append(critic_value[0, 0])
+            actions = [None] * num_agents
+            action_probs = [None] * num_agents
+            critic_value = [None] * num_agents
+
+            for i in range(num_agents):
+                action_probs[i], critic_value[i] = models[i](state)
+                critic_value_history[i].append(critic_value[i][0, 0])
+                actions[i] = np.random.choice(num_actions, p=np.squeeze(action_probs[i]))
+                #print('test')
+                #print(actions[i])
+                #print(action_probs[i][0, :])
+                #print(action_probs[i][0, actions[i]])
+                action_probs_history[i].append(tf.math.log(action_probs[i][0, actions[i]]))
 
             # Sample action from action probability distribution
-            #print(action_probs)
-            #print(critic_value)
-            print(action_probs)
-            action = np.random.choice(num_actions, p=np.squeeze(action_probs))
-            #print("Action:")
-            #print(action)
-            action_1, action_2 = action // num_single_actions, action % num_single_actions
-
-            #print((action_1, action_2))
-
-            #if np.random.rand() < epsilon:
-            #    action_1, action_2 = np.random.randint(low=0, high=num_single_actions, size=2)
-
-            action_probs_history.append(tf.math.log(action_probs[0, action]))
+            
+            #print("Actions:")
+            #print(actions)
 
             # Apply the sampled action in our environment
-            _, reward, done, _ = env.step((action_1, action_2), action_as_ind=True)
+            _, reward, done, _ = env.step(tuple(actions), action_as_ind=True)
 
             if reward > 0:
-                print('got reward!')
+                print(f'got reward: {reward}')
             if reward == 30:
                 print('completed task!')
 
@@ -127,35 +134,39 @@ while True:  # Run until solved
         returns = np.array(returns)
         returns = (returns - np.mean(returns)) / (np.std(returns) + eps)
         returns = returns.tolist()
+        
+        grads = [None] * num_agents
+        for i in range(num_agents):
+            # Calculating loss values to update our network
+            history = zip(action_probs_history[i], critic_value_history[i], returns)
+            actor_losses = []
+            critic_losses = []
+            for log_prob, value, ret in history:
+                # At this point in history, the critic estimated that we would get a
+                # total reward = `value` in the future. We took an action with log probability
+                # of `log_prob` and ended up recieving a total reward = `ret`.
+                # The actor must be updated so that it predicts an action that leads to
+                # high rewards (compared to critic's estimate) with high probability.
+                diff = ret - value
+                actor_losses.append(-log_prob * diff)  # actor loss
 
-        # Calculating loss values to update our network
-        history = zip(action_probs_history, critic_value_history, returns)
-        actor_losses = []
-        critic_losses = []
-        for log_prob, value, ret in history:
-            # At this point in history, the critic estimated that we would get a
-            # total reward = `value` in the future. We took an action with log probability
-            # of `log_prob` and ended up recieving a total reward = `ret`.
-            # The actor must be updated so that it predicts an action that leads to
-            # high rewards (compared to critic's estimate) with high probability.
-            diff = ret - value
-            actor_losses.append(-log_prob * diff)  # actor loss
+                # The critic must be updated so that it predicts a better estimate of
+                # the future rewards.
+                critic_losses.append(
+                    huber_loss(tf.expand_dims(value, 0), tf.expand_dims(ret, 0))
+                )
 
-            # The critic must be updated so that it predicts a better estimate of
-            # the future rewards.
-            critic_losses.append(
-                huber_loss(tf.expand_dims(value, 0), tf.expand_dims(ret, 0))
-            )
+            # Backpropagation
+            loss_value = sum(actor_losses) + sum(critic_losses)
+            #print('vars')
+            #print(type(models[i]))
+            grads[i] = tape.gradient(loss_value, models[i].trainable_variables)
+            optimizer.apply_gradients(zip(grads[i], models[i].trainable_variables))
 
-        # Backpropagation
-        loss_value = sum(actor_losses) + sum(critic_losses)
-        grads = tape.gradient(loss_value, model.trainable_variables)
-        optimizer.apply_gradients(zip(grads, model.trainable_variables))
-
-        # Clear the loss and reward history
-        action_probs_history.clear()
-        critic_value_history.clear()
-        rewards_history.clear()
+            # Clear the loss and reward history
+            action_probs_history[i].clear()
+            critic_value_history[i].clear()
+            rewards_history.clear()
 
     # Log details
     episode_count += 1
