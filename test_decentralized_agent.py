@@ -14,7 +14,8 @@ env.custom_init(base_env, base_env.featurize_state_mdp, display=True)
 custom_sparse_rewards = {
     'deliver_soup': 10000,
     'add_onion_to_pot': 100,
-    'pickup_onion': 1
+    'pickup_onion': 1,
+    'add_soup_to_plate': 300
 }
 mdp.set_sparse_rewards(custom_sparse_rewards)
 
