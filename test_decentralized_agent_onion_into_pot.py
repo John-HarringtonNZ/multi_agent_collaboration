@@ -26,6 +26,7 @@ central_agent = DecentralizedAgent(rl_agent_1, rl_agent_2)
 #decentralized agent will first deliver soup in episode 8 (500 steps each) seed=241
 pair, reward = learn.run_episodes_arr(central_agent, env, num_episodes=1000, num_steps=100, seed=241, render=False)
 
+print("CUMULATIVE GAME STATS\n", base_env.game_stats)
 pair.a0.epsilon = 0
 pair.a1.epsilon = 0
 
