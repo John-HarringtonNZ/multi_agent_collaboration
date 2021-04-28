@@ -13,6 +13,12 @@ class RLAgentPair(AgentPair):
 
     #def joint_action(self, state):
     #    return raiseNotDefined()
+    def decay_epsilon(self, f):
+        self.a0.epsilon *= f 
+        self.a1.epsilon *= f
+
+    def getNumQVals(self):
+        return (self.a0.getNumQVals(), self.a1.getNumQVals())
     
 #RLAgentPair with 2 independent agents 
 class DecentralizedAgent(RLAgentPair):
@@ -26,8 +32,7 @@ class DecentralizedAgent(RLAgentPair):
         act1 = self.a1.action(self.a1.process_state(state))
         return (act0, act1)
 
-    def getNumQVals(self):
-        return (self.a0.getNumQVals(), self.a1.getNumQVals())
+
 
 #RLAgentPair that acts as single agent, each joint action is really one. 
 #self.a1 is dummy agent
@@ -73,7 +78,7 @@ class CommunicationPair(RLAgentPair):
 #Agent with RL functionality, processes state for Agent use.
 class RLAgent(Agent):
 
-    def __init__(self, alpha=0.2, epsilon=0.05, gamma=0.9, parent=None):
+    def __init__(self, alpha=0.05, epsilon=0.1, gamma=0.9, parent=None):
         self.alpha = float(alpha)
         self.epsilon = float(epsilon)
         self.discount = float(gamma)
@@ -209,7 +214,10 @@ class StayRLAgent(RLAgent, StayAgent):
     """
 
     def action(self, state):
-        return 'stay'
+        return (0, 0)
+
+    def getNumQVals(self):
+        return 0
 
 
 class ApproximateQAgent(RLAgent):

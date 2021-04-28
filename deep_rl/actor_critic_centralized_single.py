@@ -21,7 +21,7 @@ input_size = env.featurize_fn(env.base_env.state)[0].shape
 #np.random.seed(seed)
 #tf.random.set_seed(seed)
 gamma = 0.99  # Discount factor for past rewards
-max_steps_per_episode = 100
+max_steps_per_episode = 200
 #env = gym.make("CartPole-v0")  # Create the environment
 #env.seed(seed)
 #State is numpy.ndarray
@@ -29,10 +29,8 @@ eps = np.finfo(np.float32).eps.item()  # Smallest number such that 1.0 + eps != 
 
 num_single_actions = 6
 num_inputs = input_size[0]
-num_actions = num_single_actions ** 2
-num_hidden = 100
-
-epsilon = 0.2
+num_actions = num_single_actions ** 1
+num_hidden = 40
 
 inputs = layers.Input(shape=(num_inputs,))
 common = layers.Dense(num_hidden, activation="relu")(inputs)
@@ -54,7 +52,7 @@ episode_count = 0
 
 #Add shape function to modify rewards
 custom_sparse_rewards = {
-    'deliver_soup': 10000,
+    'deliver_soup': 1000,
     'add_onion_to_pot': 100,
     'pickup_onion': 1
 }
@@ -68,7 +66,7 @@ while True:  # Run until solved
     with tf.GradientTape() as tape:
         for timestep in range(1, max_steps_per_episode):
             #print(f"{timestep}/{max_steps_per_episode}")
-            #env.render() 
+            env.render() 
             #; Adding this line would show the attempts
             # of the agent in a pop up window.
 
@@ -81,19 +79,17 @@ while True:  # Run until solved
             critic_value_history.append(critic_value[0, 0])
 
             # Sample action from action probability distribution
-            #print(action_probs)
+            print(action_probs)
             #print(critic_value)
-            #print(action_probs)
+
             action = np.random.choice(num_actions, p=np.squeeze(action_probs))
             #print("Action:")
             #print(action)
-            action_1, action_2 = action // num_single_actions, action % num_single_actions
+            #action_1, action_2 = action // num_single_actions, action % num_single_actions
+            action_1 = action
+            action_2 = 4
 
             #print((action_1, action_2))
-
-            #if np.random.rand() < epsilon:
-            #    action_1, action_2 = np.random.randint(low=0, high=num_single_actions, size=2)
-
             action_probs_history.append(tf.math.log(action_probs[0, action]))
 
             # Apply the sampled action in our environment
@@ -105,6 +101,7 @@ while True:  # Run until solved
                 print('completed task!')
 
             state = env.featurize_fn(env.base_env.state)[0]       
+            print(sum(state))
 
             rewards_history.append(reward)
             episode_reward += reward

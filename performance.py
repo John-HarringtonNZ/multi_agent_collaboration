@@ -32,6 +32,13 @@ env.custom_init(base_env, base_env.featurize_state_mdp, display=True)
 mlam = MediumLevelActionManager.from_pickle_or_compute(mdp, NO_COUNTERS_PARAMS, force_compute=False)
 agent_names = {}
 
+custom_sparse_rewards = {
+   'deliver_soup': 1000,
+   'add_onion_to_pot': 100,
+   'pickup_onion': 1
+}
+mdp.set_sparse_rewards(custom_sparse_rewards)
+
 a1 = RLAgent()
 a2 = RLAgent()
 decentral_agent = DecentralizedAgent(a1, a2)
@@ -54,7 +61,7 @@ approx_agent.set_mdp(mdp)
 agent_names['Approximate Q Agent'] = approx_agent
 
 results = {}
-num_episodes = 100
+num_episodes = 1000
 for name, agent in agent_names.items():
     results[name] = get_avg_rewards(agent, num_episodes, num_steps=300)
 
