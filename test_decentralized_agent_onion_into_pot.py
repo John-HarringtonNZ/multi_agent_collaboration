@@ -6,8 +6,8 @@ from overcooked_ai_py.agents.agent import RandomAgent
 from rl_agents import DecentralizedAgent, RLAgent, StayRLAgent
 import numpy as np
 
-mdp = OvercookedGridworld.from_layout_name("4100_handoff")
-#mdp = OvercookedGridworld.from_layout_name("cramped_room")
+#mdp = OvercookedGridworld.from_layout_name("4100_handoff")
+mdp = OvercookedGridworld.from_layout_name("cramped_room")
 base_env = OvercookedEnv.from_mdp(mdp)
 env = gym.make('Overcooked-v0')
 env.custom_init(base_env, base_env.featurize_state_mdp, display=True)
@@ -15,7 +15,8 @@ env.custom_init(base_env, base_env.featurize_state_mdp, display=True)
 custom_sparse_rewards = {
    'deliver_soup': 1000,
    'add_onion_to_pot': 100,
-   'pickup_onion': 1
+   'pickup_onion': 1,
+   'add_soup_to_plate': 10000
 }
 mdp.set_sparse_rewards(custom_sparse_rewards)
 

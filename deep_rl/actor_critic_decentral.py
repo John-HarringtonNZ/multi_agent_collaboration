@@ -9,7 +9,8 @@ from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
 from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
 from overcooked_ai_py.agents.agent import AgentPair, StayAgent
 
-mdp = OvercookedGridworld.from_layout_name("4100_handoff")
+env_name = "cramped_room"
+mdp = OvercookedGridworld.from_layout_name(env_name)
 #Other potentially interesting layouts: forced_coordination
 base_env = OvercookedEnv.from_mdp(mdp)
 env = gym.make('Overcooked-v0')
@@ -17,10 +18,10 @@ env.custom_init(base_env, base_env.mdp.flatten_state, display=True)
 input_size = env.featurize_fn(env.base_env.state)[0].shape
 
 # Configuration parameters for the whole setup
-seed = np.random.randint(100000)
+seed = 8375309
 print(f"Seed: {seed}")
-#np.random.seed(seed)
-#tf.random.set_seed(seed)
+np.random.seed(seed)
+tf.random.set_seed(seed)
 gamma = 0.99  # Discount factor for past rewards
 max_steps_per_episode = 200
 #env = gym.make("CartPole-v0")  # Create the environment
@@ -60,13 +61,45 @@ episode_count = 0
 
 #Add shape function to modify rewards
 custom_sparse_rewards = {
-    'deliver_soup': 0,
-    'add_onion_to_pot': 100,
-    'pickup_onion': 1
+   'deliver_soup': 10000,
+   'add_onion_to_pot': 100,
+   'pickup_onion': 1,
+   'add_soup_to_plate': 1000
 }
 mdp.set_sparse_rewards(custom_sparse_rewards)
 
+###
+import matplotlib.pyplot as plt
+def get_ave_episode_rewards(ave_episode_dict, figure_title='testing_agents'):
 
+    fig, ax = plt.subplots()
+
+    for plot_title, rewards in ave_episode_dict.items():
+
+        ax.plot(rewards, label=plot_title)
+
+    ax.set_xlabel('Episodes')
+    ax.set_ylabel('Average Reward')
+    ax.set_title('Average Reward over time for Overcooked Agents')
+    plt.legend(loc='upper right')
+    plt.savefig(f'{figure_title}.png')
+
+    return fig
+
+
+def windowed_average_plot(ave_episode_dict, window_size=10, figure_title='testing_agents'):
+
+    windowed = {}
+    for plot_title, rewards in ave_episode_dict.items():
+
+        window = np.ones(int(window_size))/float(window_size)
+        windowed[plot_title] =  np.convolve(rewards, window, 'same')
+
+    fig = get_ave_episode_rewards(windowed, figure_title)
+
+    return fig 
+####
+growing_rewards = []
 while True:  # Run until solved
     state, _ = env.reset(regen_mdp=False, return_only_state=True)
 
@@ -111,6 +144,7 @@ while True:  # Run until solved
 
         # Update running reward to check condition for solving
         running_reward = 0.05 * episode_reward + (1 - 0.05) * running_reward
+        growing_rewards.append(running_reward)
 
         # Calculate expected value from rewards
         # - At each timestep what was the total reward received after that timestep
@@ -165,7 +199,15 @@ while True:  # Run until solved
     if episode_count % 10 == 0:
         template = "running reward: {:.2f} at episode {}"
         print(template.format(running_reward, episode_count))
+    
+    #print(growing_rewards)
+    if episode_count > 30:
+        #print("Saving Returns")
+        r = {"Actor-Critic": growing_rewards}
+        windowed_average_plot(r, figure_title='ac_intermediate_rewards_{env_name}_{max_steps_per_episode}_steps_{seed}_seed')
 
-    if running_reward > 195:  # Condition to consider the task solved
+    if running_reward > 100000:  # Condition to consider the task solved
         print("Solved at episode {}!".format(episode_count))
         break
+
+

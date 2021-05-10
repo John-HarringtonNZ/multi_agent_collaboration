@@ -3,6 +3,10 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+import sys
+sys.path.insert(0, "../../")
+from visualizations import windowed_average_plot
+
 
 # Configuration paramaters for the whole setup
 seed = 42
@@ -22,8 +26,12 @@ max_steps_per_episode = 100
 #env = wrap_deepmind(env, frame_stack=True, scale=True)
 #env.seed(seed)
 
-num_actions = 6
+num_actions = 36
 
+seed = 8375309
+print(f"Seed: {seed}")
+np.random.seed(seed)
+tf.random.set_seed(seed)
 
 ####
 
@@ -33,7 +41,7 @@ from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
 from overcooked_ai_py.agents.agent import AgentPair, StayAgent
 import gym
 
-mdp = OvercookedGridworld.from_layout_name("cramped_room")
+mdp = OvercookedGridworld.from_layout_name("4100_handoff")
 #Other potentially interesting layouts: forced_coordination
 base_env = OvercookedEnv.from_mdp(mdp)
 env = gym.make('Overcooked-v0')
@@ -41,9 +49,10 @@ env.custom_init(base_env, base_env.mdp.flatten_state, display=True)
 input_size = env.featurize_fn(env.base_env.state)[0].shape
 
 custom_sparse_rewards = {
-   'deliver_soup': 1000,
-   'add_onion_to_pot': 100,
-   'pickup_onion': 1
+   'deliver_soup': 0000,
+   'add_onion_to_pot': 00,
+   'pickup_onion': 1,
+   'add_soup_to_plate': 000
 }
 mdp.set_sparse_rewards(custom_sparse_rewards)
 
@@ -52,7 +61,7 @@ mdp.set_sparse_rewards(custom_sparse_rewards)
 
 def create_q_model():
     # Network defined by the Deepmind paper
-    inputs = layers.Input(shape=(375, 300, 3,))
+    inputs = layers.Input(shape=(375, 375, 3,))
 
     # Convolutions on the frames on the screen
     layer1 = layers.Conv2D(32, 8, strides=4, activation="relu")(inputs)
@@ -96,14 +105,13 @@ epsilon_random_frames = 2000
 epsilon_greedy_frames = 1000000.0
 # Maximum replay length
 # Note: The Deepmind paper suggests 1000000 however this causes memory issues
-max_memory_length = 10000
+max_memory_length = 3000
 # Train the model after 4 actions
 update_after_actions = 4
 # How often to update the target network
-update_target_network = 1000
+update_target_network = 10000
 # Using huber loss for stability
 loss_function = keras.losses.Huber()
-
 while True:  # Run until solved
     _, _ = env.reset(regen_mdp=False, return_only_state=True)
     state = env.return_state_img()
@@ -127,12 +135,15 @@ while True:  # Run until solved
             # Take best action
             action = tf.argmax(action_probs[0]).numpy()
 
+        action_1, action_2 = action // 6, action % 6
+
+
         # Decay probability of taking random action
         epsilon -= epsilon_interval / epsilon_greedy_frames
         epsilon = max(epsilon, epsilon_min)
 
         # Apply the sampled action in our environment
-        obs, reward, done, _ = env.step((action, 4), action_as_ind=True)
+        obs, reward, done, _ = env.step((action_1, action_2), action_as_ind=True)
         state_next = env.return_state_img()
         state_next = np.array(state_next)
 
@@ -147,6 +158,7 @@ while True:  # Run until solved
         state_next_history.append(state_next)
         done_history.append(done)
         rewards_history.append(reward)
+
         state = state_next
 
         # Update every fourth frame and once batch size is over 32
@@ -197,7 +209,7 @@ while True:  # Run until solved
             # Log details
             template = "running reward: {:.2f} at episode {}, frame count {}"
             print(template.format(running_reward, episode_count, frame_count))
-        print(f"Len reward history: {len(rewards_history)}")
+
         # Limit the state and reward history
         if len(rewards_history) > max_memory_length:
             del rewards_history[:1]
@@ -217,6 +229,11 @@ while True:  # Run until solved
     print(f"Running Reward: {running_reward}")
 
     episode_count += 1
+
+    if episode_count > 5:
+        print("Saving Returns")
+        r = {"Deep QLearning": episode_reward_history}
+        windowed_average_plot(r, figure_title='DeepQL With Intermediate Rewards')
 
     if running_reward > 1300:  # Condition to consider the task solved
         print("Solved at episode {}!".format(episode_count))

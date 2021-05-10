@@ -9,7 +9,7 @@ from rl_agents import *
 from operator import add
 from overcooked_ai_py.agents.agent import StayAgent
 
-def get_avg_rewards(a_pair, num_episodes, num_steps = 1000, seeds=[123,456,999,101010101]):
+def get_avg_rewards(a_pair, num_episodes, num_steps = 1000, seeds=[123,456]):
     rewards = []
     for s in seeds:
         a_pair.a0.reset_q_values()
@@ -25,7 +25,7 @@ def get_avg_rewards(a_pair, num_episodes, num_steps = 1000, seeds=[123,456,999,1
 ###############################################
 
 mdp = OvercookedGridworld.from_layout_name("4100_isolated")
-#Other potentially interesting layouts: forced_coordination
+
 base_env = OvercookedEnv.from_mdp(mdp)
 env = gym.make('Overcooked-v0')
 env.custom_init(base_env, base_env.featurize_state_mdp, display=True)
@@ -33,9 +33,10 @@ mlam = MediumLevelActionManager.from_pickle_or_compute(mdp, NO_COUNTERS_PARAMS, 
 agent_names = {}
 
 custom_sparse_rewards = {
-   'deliver_soup': 1000,
-   'add_onion_to_pot': 100,
-   'pickup_onion': 1
+    'deliver_soup': 10000,
+    'add_onion_to_pot': 100,
+    'pickup_onion': 1,
+    'add_soup_to_plate': 1000
 }
 mdp.set_sparse_rewards(custom_sparse_rewards)
 
@@ -61,9 +62,9 @@ approx_agent.set_mdp(mdp)
 agent_names['Approximate Q Agent'] = approx_agent
 
 results = {}
-num_episodes = 1000
+num_episodes = 100
 for name, agent in agent_names.items():
-    results[name] = get_avg_rewards(agent, num_episodes, num_steps=300)
+    results[name] = get_avg_rewards(agent, num_episodes, num_steps=100)
 
 from visualizations import *
-windowed_average_plot(results, figure_title='agent_comparison')
+windowed_average_plot(results, figure_title=f'results/agent_comparison_with_intermediate_rewards_without_drop_{num_steps}_steps')

@@ -32,6 +32,11 @@ num_inputs = input_size[0]
 num_actions = num_single_actions ** 1
 num_hidden = 40
 
+seed = 8375309
+print(f"Seed: {seed}")
+np.random.seed(seed)
+tf.random.set_seed(seed)
+
 inputs = layers.Input(shape=(num_inputs,))
 common = layers.Dense(num_hidden, activation="relu")(inputs)
 common_2 = layers.Dense(num_hidden, activation="relu")(common)

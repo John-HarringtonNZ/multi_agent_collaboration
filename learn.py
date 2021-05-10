@@ -53,8 +53,8 @@ def run_episodes_arr_q(agent_pair, env, num_episodes, num_steps, seed=None, rend
     rewards = []
     for e in range(num_episodes):
         env.reset(regen_mdp=False)
-        print(f"Starting episode {e}, Ave: {total_episodes_reward/(e+1)}")
         agent_pair, e_reward = run_game(agent_pair, env, num_steps, render=render)
+        print(f"Episode {e}, Reward: {e_reward}")
         total_episodes_reward += e_reward
         rewards.append(e_reward)
         q_counts.append(agent_pair.getNumQVals())
